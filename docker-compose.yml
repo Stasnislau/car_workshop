@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  db:
+    container_name: car_workshop
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=12345
+      - POSTGRES_DB=carWorkshop
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
