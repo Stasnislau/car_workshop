@@ -4,8 +4,9 @@ from PyQt5.QtCore import QRect, Qt
 
 
 class DocumentView(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         super().__init__(parent)
+        self.parent = parent
 
         layout = QVBoxLayout(self)
 

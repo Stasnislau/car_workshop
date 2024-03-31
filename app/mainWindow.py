@@ -3,19 +3,17 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QRect, Qt
 from .views.employeeView import EmployeeView
 from .views.mainView import MainView
+from .views.documentView import DocumentView
+from .views.ticketView import TicketView
 
 
 class MainWindow(QMainWindow):
-    current_view = None
 
     def __init__(self):
         super().__init__()
-        self.employeeView = EmployeeView()
-        self.mainView = MainView(self)
-        self.changeView(self.mainView)
-
+        self.changeView("main")
         self.setWindowTitle("Car Workshop")
-        self.setGeometry(0, 0, 1920, 1080)
+        self.setGeometry(0, 0, 1920, 1055)
         screenGeometry = QApplication.desktop().screenGeometry()
         windowGeometry = self.geometry()
         windowCenterPoint = windowGeometry.center()
@@ -27,5 +25,19 @@ class MainWindow(QMainWindow):
         self.move(windowCenterPoint)
 
     def changeView(self, view):
-        self.setCentralWidget(view)
+        currentView = self.centralWidget()
+        if currentView:
+            currentView.deleteLater()
+        viewToBeSet = None
+        if view == "employee":
+            viewToBeSet = EmployeeView(self)
+        elif view == "main":
+            viewToBeSet = MainView(self)
+        elif view == "ticket":
+            viewToBeSet = TicketView(self)
+        elif view == "document":
+            viewToBeSet = DocumentView(self)
+        else :
+            return
+        self.setCentralWidget(viewToBeSet)
         self.show()

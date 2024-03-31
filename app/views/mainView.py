@@ -24,8 +24,6 @@ class MainView(QWidget):
         self.ticketNavigationButton.setIcon(QIcon("assets/ticket_icon.jpg"))
         self.ticketNavigationButton.setIconSize(
             self.ticketNavigationButton.size())
-        self.ticketNavigationButton.setStyleSheet(
-            "border: 2px solid #2196F3; border-radius: 10px; color: #2196F3; font-size: 16px;")
         self.ticketNavigationButton.clicked.connect(self.showTicketView)
 
         self.documentNavigationButton = QPushButton(self)
@@ -52,10 +50,14 @@ class MainView(QWidget):
         self.documentLabel.setStyleSheet("font-size: 20px;")
 
     def showEmployeeView(self):
-        self.parent.changeView(EmployeeView())
+        self.parent.changeView("employee")
+        pass
 
     def showTicketView(self):
-        self.parent.changeView(TicketView())
+        self.parent.changeView("ticket")
+        pass
 
     def showDocumentView(self):
-        self.parent.changeView(DocumentView())
+        self.parent.changeView("document")
+        pass
+    

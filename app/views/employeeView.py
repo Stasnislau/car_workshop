@@ -1,29 +1,49 @@
 from PyQt5.QtWidgets import QPushButton, QLabel, QVBoxLayout, QWidget, QMainWindow
+from PyQt5.QtCore import QRect, Qt
 
-class EmployeeView(QWidget):  # Change base class to QWidget
-    def __init__(self, parent=None):  # Add parent parameter
+
+class EmployeeView(QWidget):
+    def __init__(self, parent):
         super().__init__(parent)
+        self.parent = parent
 
         layout = QVBoxLayout(self)
 
-        label = QLabel("Welcome to the Employee Management System", self)
-        layout.addWidget(label)
+        titleLabel = QLabel("Employee Management", self)
+        titleLabel.setStyleSheet("font-size: 24px; font-weight: bold;")
+        layout.addWidget(titleLabel, alignment=Qt.AlignCenter)
 
-        employeeButton = QPushButton("Add Employee", self)
-        employeeButton.clicked.connect(self.addEmployee)
-        layout.addWidget(employeeButton)
+        optionsLayout = QVBoxLayout()
+        layout.addLayout(optionsLayout)
 
-        searchButton = QPushButton("Search Employees", self)
-        searchButton.clicked.connect(self.searchEmployees)
-        layout.addWidget(searchButton)
+        options = ["Add Employee", "Search Employees",
+                   "Edit Employee", "Delete Employee"]
+        for option in options:
+            button = QPushButton(option, self)
+            button.clicked.connect(self.handleOptionClick)
+            optionsLayout.addWidget(button)
 
-        editButton = QPushButton("Edit Employee", self)
-        editButton.clicked.connect(self.editEmployee)
-        layout.addWidget(editButton)
+        returnButton = QPushButton("Return to Main Menu", self)
+        returnButton.clicked.connect(self.returnToMainView)
+        layout.addWidget(returnButton, alignment=Qt.AlignCenter)
 
-        deleteButton = QPushButton("Delete Employee", self)
-        deleteButton.clicked.connect(self.deleteEmployee)
-        layout.addWidget(deleteButton)
+    def handleOptionClick(self):
+        senderButton = self.sender()
+        if senderButton:
+            optionText = senderButton.text()
+            if optionText == "Add Employee":
+                self.addEmployee()
+            elif optionText == "Search Employees":
+                self.searchEmployees()
+            elif optionText == "Edit Employee":
+                self.editEmployee()
+            elif optionText == "Delete Employee":
+                self.deleteEmployee()
+
+    def returnToMainView(self):
+        parentWidget = self.parent
+        if isinstance(parentWidget, QMainWindow):
+            parentWidget.changeView("main")
 
     def addEmployee(self):
         # Functionality to add an employee

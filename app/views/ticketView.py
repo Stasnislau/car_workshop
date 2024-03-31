@@ -3,8 +3,9 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QRect, Qt
 
 class TicketView(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         super().__init__(parent)
+        self.parent = parent
 
         layout = QVBoxLayout(self)
 
@@ -24,7 +25,7 @@ class TicketView(QWidget):
         layout.addWidget(editButton)
 
         delete_button = QPushButton("Delete Ticket", self)
-        delete_button.clicked.connect(self.delete_ticket)
+        delete_button.clicked.connect(self.deleteTicket)
         layout.addWidget(delete_button)
     
     def addTicket(self):
