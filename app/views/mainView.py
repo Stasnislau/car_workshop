@@ -60,4 +60,3 @@ class MainView(QWidget):
     def showDocumentView(self):
         self.parent.changeView("document")
         pass
-    

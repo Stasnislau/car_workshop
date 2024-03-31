@@ -12,8 +12,9 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.changeView("main")
+
         self.setWindowTitle("Car Workshop")
-        self.setGeometry(0, 0, 1920, 1055)
+        self.setGeometry(0, 0, 1920, 1080)
         screenGeometry = QApplication.desktop().screenGeometry()
         windowGeometry = self.geometry()
         windowCenterPoint = windowGeometry.center()
@@ -37,7 +38,7 @@ class MainWindow(QMainWindow):
             viewToBeSet = TicketView(self)
         elif view == "document":
             viewToBeSet = DocumentView(self)
-        else :
+        else:
             return
         self.setCentralWidget(viewToBeSet)
         self.show()

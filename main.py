@@ -8,6 +8,7 @@ def main():
     app = QApplication(sys.argv)
 
     window = MainWindow()
+    window.setStyleSheet("background-color: #f0f0f0;")
     window.show()
 
     sys.exit(app.exec_())
