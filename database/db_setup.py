@@ -40,6 +40,17 @@ class Ticket(Base):
     pricePaid = Column(DECIMAL(10, 2))
     parts = relationship("Part", back_populates="ticket")
 
+    timeSlots = relationship("TimeSlot", back_populates="ticket")
+
+    def __init__(self, brand, model, registrationId, problemDescription, employeeId ):
+        self.brand = brand
+        self.model = model
+        self.registrationId = registrationId
+        self.problemDescription = problemDescription
+        self.employeeId = employeeId
+        self.state = "Created"
+        
+
 
 class TimeSlot(Base):
     __tablename__ = 'timeSlots'
@@ -49,6 +60,14 @@ class TimeSlot(Base):
     endTime = Column(DateTime(timezone=True), nullable=False)
     employeeId = Column(Integer, ForeignKey('employees.id'))
     employee = relationship("Employee", back_populates="timeSlots")
+    ticketId = Column(Integer, ForeignKey('tickets.id'))
+    ticket = relationship("Ticket", back_populates="timeSlots")
+
+    def __init__(self, startTime, endTime, employeeId, ticketId):
+        self.startTime = startTime
+        self.endTime = endTime
+        self.employeeId = employeeId
+        self.ticketId = ticketId
 
 
 class Part(Base):
@@ -62,6 +81,13 @@ class Part(Base):
     totalPrice = Column(DECIMAL(10, 2), nullable=False)
     ticketId = Column(Integer, ForeignKey('tickets.id'))
     ticket = relationship("Ticket", back_populates="parts")
+    
+    def __init__(self, name, amount, unitPrice, ticketId):
+        self.name = name
+        self.amount = amount
+        self.unitPrice = unitPrice
+        self.totalPrice = amount * unitPrice
+        self.ticketId = ticketId
 
 
 def createDatabase():

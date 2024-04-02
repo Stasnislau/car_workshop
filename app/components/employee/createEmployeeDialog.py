@@ -44,27 +44,27 @@ class CreateEmployeeDialog(QDialog):
 
     def createEmployee(self):
         name = self.nameInput.text()
-        price_per_hour = self.priceInput.text()
+        pricePerHour = self.priceInput.text()
 
-        if not name or not price_per_hour:
+        if not name or not pricePerHour:
             QMessageBox.warning(
                 self, "Warning", "Please provide both name and price per hour.")
             return
 
         try:
-            price_per_hour = float(price_per_hour)
-            if price_per_hour <= 0:
+            pricePerHour = float(pricePerHour)
+            if pricePerHour <= 0:
                 raise ValueError
         except ValueError:
             QMessageBox.warning(
                 self, "Warning", "Price per hour must be a positive number.")
             return
 
-        print(f"Creating employee: {name}, {price_per_hour}")
+        print(f"Creating employee: {name}, {pricePerHour}")
         employeeService = EmployeeService()
-        success, employee = employeeService.createEmployee(name, price_per_hour)
+        success, message = employeeService.createEmployee(name, pricePerHour)
         if not success:
-            QMessageBox.warning(self, "Warning", employee)
+            QMessageBox.warning(self, "Warning", message)
             return
 
         self.accept()

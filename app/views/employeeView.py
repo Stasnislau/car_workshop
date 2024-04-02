@@ -13,7 +13,7 @@ class EmployeeView(QWidget):
         self.currentEmployee = None
 
         mainLayout = QVBoxLayout(self)
-        mainLayout.setContentsMargins(50, 50, 50, 50)  # Add some margin
+        mainLayout.setContentsMargins(50, 50, 50, 50)
 
         titleLabel = QLabel("Employee Management", self)
         titleLabel.setStyleSheet(
@@ -51,7 +51,6 @@ class EmployeeView(QWidget):
 
         middleLayout.addWidget(leftWidget)
 
-        # Right part with employee information
         rightWidget = QWidget()
         rightLayout = QVBoxLayout(rightWidget)
 
@@ -68,7 +67,6 @@ class EmployeeView(QWidget):
         middleLayout.addWidget(rightWidget)
         mainLayout.addWidget(middleWidget)
 
-        # Return to Main Menu button
         returnButton = QPushButton("Return to Main Menu", self)
         returnButton.clicked.connect(self.returnToMainView)
         returnButton.setStyleSheet(
@@ -76,7 +74,6 @@ class EmployeeView(QWidget):
         returnButton.setFixedSize(200, 50)
         mainLayout.addWidget(returnButton, alignment=Qt.AlignCenter)
 
-        # Fetch employees
         self.fetchEmployees()
 
     def handleOptionClick(self):
@@ -95,17 +92,25 @@ class EmployeeView(QWidget):
         if index != -1:
             self.currentEmployee = self.employees[index]
             if self.currentEmployee:
-                info_text = f"Name: {self.currentEmployee.name}\nHourly Rate: {self.currentEmployee.hourlyRate}"
+                infoText = f"Name: {self.currentEmployee.name}\nHourly Rate: {self.currentEmployee.hourlyRate}"
             else:
-                info_text = "No employee selected"
+                infoText = "No employee selected"
         else:
-            info_text = "No employee selected"
+            infoText = "No employee selected"
 
-        self.informationLabel.setText(info_text)
+        self.informationLabel.setText(infoText)
 
     def fetchEmployees(self):
-        self.employees = EmployeeService().getEmployees()
+        success, self.employees = EmployeeService().getEmployees()
+        if not success:
+            QMessageBox.warning(self, "Error", self.employees)
+            return
         self.employeeDropdown.clear()
+        if not self.employees:
+            self.employeeDropdown.setAccessibleName("No employees found")
+            self.employeeDropdown.setDisabled(True)
+            return
+        self.employeeDropdown.setDisabled(False)
         for employee in self.employees:
             self.employeeDropdown.addItem(employee.name)
 
@@ -128,12 +133,11 @@ class EmployeeView(QWidget):
         if self.currentEmployee:
             dialog = DeleteEmployeeDialog(self.currentEmployee.name, self)
             if dialog.exec_():
-                # User clicked "Yes"
                 success, message = EmployeeService().deleteEmployee(self.currentEmployee.id)
                 if success:
                     QMessageBox.information(
                         self, "Success", "Employee deleted successfully.")
-                    self.fetchEmployees()  # Update employee list
+                    self.fetchEmployees() 
                 else:
                     QMessageBox.warning(self, "Error", message)
             else:

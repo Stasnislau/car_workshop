@@ -14,20 +14,20 @@ class EmployeeService:
             session.add(employee)
             session.commit()
             session.close()
-            return True, employee
+            return True, "Employee created successfully."
         except ValueError:
             return False, "Price per hour must be a positive number."
         except Exception as e:
-            self.handleError(e)
+            return self.handleError(e)
 
     def getEmployees(self):
         try:
             session = create_session()
             employees = session.query(Employee).all()
             session.close()
-            return employees
+            return True, employees
         except Exception as e:
-            self.handleError(e)
+            return self.handleError(e)
 
     def getEmployee(self, employeeId):
         try:
@@ -36,7 +36,7 @@ class EmployeeService:
             session.close()
             return employee
         except Exception as e:  # Capture the exception
-            self.handleError(e)
+            return self.handleError(e)
 
     def updateEmployee(self, employeeId, name, hourlyRate):
         try:
@@ -53,7 +53,7 @@ class EmployeeService:
         except ValueError:
             return False, "Price per hour must be a positive number."
         except Exception as e:
-            self.handleError(e)
+            return self.handleError(e)
     
     def deleteEmployee(self, employeeId):
         try:
@@ -64,8 +64,8 @@ class EmployeeService:
             session.close()
             return True, "Employee deleted successfully."
         except Exception as e:
-            self.handleError(e)
+            return self.handleError(e)
 
     def handleError(self, error):
         print(f"Error: {error}")
-        pass
+        return False, "An error occurred. Please try again later."        
