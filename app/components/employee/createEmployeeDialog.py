@@ -1,4 +1,5 @@
 from PyQt5.QtWidgets import QDialog, QLabel, QLineEdit, QVBoxLayout, QPushButton, QMessageBox
+from ...services.employeeService import EmployeeService
 
 
 class CreateEmployeeDialog(QDialog):
@@ -49,6 +50,12 @@ class CreateEmployeeDialog(QDialog):
 
         # Here you can add the code to create the employee in your system
         print(f"Creating employee: {name}, {price_per_hour}")
+        # put the employee in the database
+        employeeService = EmployeeService()
+        success, employee = employeeService.createEmployee(name, price_per_hour)
+        if not success:
+            QMessageBox.warning(self, "Warning", employee)
+            return
 
         # Optionally, you can close the dialog after successful creation
         self.accept()

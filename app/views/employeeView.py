@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QPushButton, QLabel, QVBoxLayout, QWidget, QMainWind
 from PyQt5.QtCore import Qt
 from ..components.employee.createEmployeeDialog import CreateEmployeeDialog
 
+
 class EmployeeView(QWidget):
     def __init__(self, parent):
         super().__init__(parent)
@@ -11,7 +12,7 @@ class EmployeeView(QWidget):
 
         titleLabel = QLabel("Employee Management", self)
         titleLabel.setStyleSheet("font-size: 24px; font-weight: bold;")
-        titleLabel.setFixedSize(300, 50)
+        titleLabel.setFixedSize(300, 30)
         mainLayout.addWidget(titleLabel, alignment=Qt.AlignCenter)
 
         # Middle part with left and right layouts
@@ -21,7 +22,11 @@ class EmployeeView(QWidget):
         # Left part with buttons and dropdown
         leftWidget = QWidget()
         leftLayout = QVBoxLayout(leftWidget)
-
+        self.employeeDropdown = QComboBox(leftWidget)
+        
+        self.employeeDropdown.setFixedSize(200, 50)
+        leftLayout.addWidget(self.employeeDropdown, alignment=Qt.AlignCenter)
+        
         optionsLayout = QVBoxLayout()
         leftLayout.addLayout(optionsLayout)
 
@@ -32,10 +37,6 @@ class EmployeeView(QWidget):
             button.setFixedSize(200, 50)  # Set size for each button
             optionsLayout.addWidget(button, alignment=Qt.AlignCenter)
 
-        self.employeeDropdown = QComboBox(leftWidget)
-        self.employeeDropdown.setFixedSize(200, 50)
-        leftLayout.addWidget(self.employeeDropdown, alignment=Qt.AlignCenter)
-
         middleLayout.addWidget(leftWidget)  # Add leftWidget to middleLayout
 
         # Right part with rectangles
@@ -43,25 +44,25 @@ class EmployeeView(QWidget):
         rightLayout = QVBoxLayout(rightWidget)
 
         # Add widgets to rightLayout here
-        
+
         informationLabel = QLabel("Employee Information", rightWidget)
         informationLabel.setStyleSheet("font-size: 18px; font-weight: bold;")
-        informationLabel.setFixedSize(200, 50)
+        informationLabel.setFixedSize(210, 50)
         rightLayout.addWidget(informationLabel, alignment=Qt.AlignCenter)
-        
-        # TODO: include name, price per hour, 
-        
+
+        # TODO: include name, price per hour,
+
         informationLabel = QLabel("Employee Schedule", rightWidget)
         informationLabel.setStyleSheet("font-size: 18px; font-weight: bold;")
         informationLabel.setFixedSize(200, 50)
-        
+
         rightLayout.addWidget(informationLabel, alignment=Qt.AlignCenter)
-        
+
         scheduleContainer = QWidget(rightWidget)
         scheduleLayout = QVBoxLayout(scheduleContainer)
         scheduleContainer.setStyleSheet("border: 1px solid black;")
-        scheduleContainer.setFixedSize(500, 400)
-        rightLayout.addWidget(scheduleContainer, alignment=Qt.AlignCenter)        
+        scheduleContainer.setFixedSize(500, 600)
+        rightLayout.addWidget(scheduleContainer, alignment=Qt.AlignCenter)
 
         middleLayout.addWidget(rightWidget)  # Add rightWidget to middleLayout
 
