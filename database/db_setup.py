@@ -48,6 +48,9 @@ class Ticket(Base):
         self.registrationId = registrationId
         self.problemDescription = problemDescription
         self.employeeId = employeeId
+        self.estimateCost = 0
+        self.estimateAccepted = False
+        self.pricePaid = 0
         self.state = "Created"
         
 

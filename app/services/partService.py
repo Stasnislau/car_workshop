@@ -1,17 +1,19 @@
 from database.database_config import create_session
 from database.db_setup import Part
+from .ticketService import TicketService
 
 class PartService:
     def createPart(self, ticketId, name, amount, unitPrice) -> tuple[bool, str]:
         try:
             if not name or not amount or not unitPrice:
                 return False, "All fields are required."
-            
             session = create_session()
             part = Part(ticketId, name, amount, unitPrice)
             session.add(part)
             session.commit()
+            TicketService().recalculateExpanses(part.ticketId)
             session.close()
+            
             return True, "Part created successfully."
         except Exception as e:
             return self.handleError(e)
@@ -27,7 +29,9 @@ class PartService:
             part.amount = amount
             part.unitPrice = unitPrice
             session.commit()
+            TicketService().recalculateExpanses(part.ticketId)
             session.close()
+            
             return True, "Part updated successfully."
         except Exception as e:
             return self.handleError(e)
@@ -38,6 +42,7 @@ class PartService:
             part = session.query(Part).get(partId)
             session.delete(part)
             session.commit()
+            TicketService().recalculateExpanses(part.ticketId)
             session.close()
             return True, "Part deleted successfully."
         except Exception as e:
@@ -48,6 +53,7 @@ class PartService:
             session = create_session()
             parts = session.query(Part).filter_by(ticketId=ticketId).all()
             session.close()
+            
             return True, parts
         except Exception as e:
             return self.handleError(e)

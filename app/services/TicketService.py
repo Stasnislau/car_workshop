@@ -23,6 +23,7 @@ class TicketService:
                 startDate, endDate, employeeId, ticket.id)
             session.add(timeSlot)
             session.commit()
+            self.recalculateExpanses(ticket.id)
             session.close()
             return True, "Ticket created successfully."
         except Exception as e:
@@ -65,6 +66,7 @@ class TicketService:
             ticket.registrationId = registrationId
             ticket.problemDescription = problemDescription
             session.commit()
+            self.recalculateExpanses(ticket.id)
             session.close()
             return True, "Ticket updated successfully."
         except Exception as e:
@@ -99,21 +101,22 @@ class TicketService:
             timeSlot.endTime = endTime
             timeSlot.employeeId = employeeId
             session.commit()
+            self.recalculateExpanses(timeSlot.ticketId)
             session.close()
             return True, "Time slot updated successfully."
         except Exception as e:
             return self.handleError(e)
         
-    def approvePreliminary(self, ticketId) -> tuple[bool, str]:
+    def confirmEstimate(self, ticketId) -> tuple[bool, str]:
         try:
             session = create_session()
             ticket = session.query(Ticket).get(ticketId)
             if ticket.estimateAccepted:
-                return False, "Ticket already approved."
+                return False, "Estimate already accepted."
             ticket.estimateAccepted = True
             session.commit()
             session.close()
-            return True, "Ticket approved successfully."
+            return True, "Estimate approved successfully."
         except Exception as e:
             return self.handleError(e)
 
@@ -123,8 +126,30 @@ class TicketService:
             timeSlot = session.query(TimeSlot).get(timeSlotId)
             session.delete(timeSlot)
             session.commit()
+            self.recalculateExpanses(timeSlot.ticketId)
             session.close()
             return True, "Time slot deleted successfully."
+        except Exception as e:
+            return self.handleError(e)
+        
+    def recalculateExpanses(self, ticketId) -> tuple[bool, str]:
+        try:
+            session = create_session()
+            ticket = session.query(Ticket).get(ticketId)
+            timeSlots = session.query(TimeSlot).filter_by(ticketId=ticketId).all()
+            totalHours = 0
+            for timeSlot in timeSlots:
+                totalHours += timeSlot.endTime - timeSlot.startTime
+            totalPrice = totalHours * ticket.employee.hourlyRate
+            for part in ticket.parts:
+                totalPrice += part.totalPrice
+            if ticket.estimateAccepted:
+                ticket.pricePaid = totalPrice
+            else:
+                ticket.estimateCost = totalPrice
+            session.commit()
+            session.close()
+            return True, "Expanse recalculated successfully."
         except Exception as e:
             return self.handleError(e)
 

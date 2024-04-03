@@ -107,7 +107,6 @@ class TicketView(QWidget):
         mainLayout.addWidget(returnButton, alignment=Qt.AlignCenter)
 
         self.fetchEmployees()
-        # self.updateButtonStates()
 
     def handleOptionClick(self):
         senderButton = self.sender()
@@ -123,6 +122,8 @@ class TicketView(QWidget):
                 self.addPart()
             elif optionText == "Edit Parts":
                 self.editParts()
+            elif optionText == "Confirm Estimate":
+                self.confirmEstimate()
 
     def updateTicketDropdown(self):
         index = self.employeeDropdown.currentIndex()
@@ -153,7 +154,7 @@ class TicketView(QWidget):
         if index != -1:
             self.currentTicket = self.tickets[index]
             if self.currentTicket:
-                infoText = f"Registration number: {self.currentTicket.registrationId}\nBrand: {self.currentTicket.brand}\nModel: {self.currentTicket.model}\nProblem Description: {self.currentTicket.problemDescription}"
+                infoText = f"Registration number: {self.currentTicket.registrationId}\nBrand: {self.currentTicket.brand}\nModel: {self.currentTicket.model}\nProblem Description: {self.currentTicket.problemDescription}\n{self.displayedCost()}"
             else:
                 infoText = "No ticket selected"
         else:
@@ -161,23 +162,6 @@ class TicketView(QWidget):
             self.currentTicket = None
 
         self.informationLabel.setText(infoText)
-        # self.updateButtonStates()
-
-    # def updateButtonStates(self):
-    #     buttons = [self.optionsLayout.findChild(QPushButton, name) for name in ["Add Ticket", "Edit Ticket", "Delete Ticket",
-    #                                                                             "Add Part", "Edit Parts", "Confirm Estimate"]]
-    #     print(buttons)
-    #     if self.currentTicket is None:
-    #         buttons[0].setEnabled(True)
-    #         for button in buttons[1:]:
-    #             button.setEnabled(False)
-    #             button.setStyleSheet(
-    #                 "font-size: 14px; background-color: #ccc; color: #666; border: none;")
-    #     else:
-    #         for button in buttons:
-    #             button.setEnabled(True)
-    #             button.setStyleSheet(
-    #                 "font-size: 14px; background-color: #007bff; color: #fff; border: none;")
 
     def fetchEmployees(self):
         success, self.employees = EmployeeService().getEmployees()
@@ -256,6 +240,24 @@ class TicketView(QWidget):
             EditPartDialog(self, self.currentTicket).show()
         else:
             QMessageBox.warning(self, "Error", "Please select a ticket.")
+
+    def confirmEstimate(self):
+        if self.currentTicket is not None and self.currentTicket.estimateAccepted is False:
+            success, message = TicketService().confirmEstimate(self.currentTicket.id)
+            if success:
+                QMessageBox.information(
+                    self, "Success", "Estimate confirmed successfully.")
+                self.fetchTickets()
+            else:
+                QMessageBox.warning(self, "Error", message)
+        else:
+            QMessageBox.warning(self, "Error", "Please select a ticket.")
+
+    def displayedCost(self):
+        if self.currentTicket.estimateAccepted:
+            return f"Price Paid: {self.currentTicket.pricePaid}"
+        else:
+            return f"Estimate Cost: {self.currentTicket.estimateCost}"
 
 
 # TODO: Add one more button for the employee to accept the ticket, if the ticket is accepted both the employee and the ticket status goes to "In Progress"
