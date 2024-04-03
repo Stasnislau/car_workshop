@@ -10,6 +10,7 @@ class CreateTicketDialog(QDialog):
     def __init__(self, parent, employee):
         super().__init__(parent)
         self.employee = employee
+        self.parent = parent
         self.setWindowTitle("Create Ticket")
         self.setFixedSize(350, 500)
 
@@ -90,10 +91,8 @@ class CreateTicketDialog(QDialog):
         registrationId = self.registrationIdInput.text()
         problemDescription = self.problemDescriptionInput.text()
         startDate = self.dateEdit.dateTime().toString("yyyy-MM-dd")
-        startTime = self.startTimeEdit.time().toString("HH:00")  # Get only the hour part
-        endTime = self.endTimeEdit.time().toString("HH:00")  # Get only the hour part
-        
-        # link start date and start time and start date and end time as datetimeObject
+        startTime = self.startTimeEdit.time().toString("HH:00")
+        endTime = self.endTimeEdit.time().toString("HH:00")
         
         startDateTime = datetime.strptime(startDate + " " + startTime, "%Y-%m-%d %H:%M")
         endDateTime = datetime.strptime(startDate + " " + endTime, "%Y-%m-%d %H:%M")   
@@ -108,6 +107,7 @@ class CreateTicketDialog(QDialog):
         if success:
             QMessageBox.information(
                 self, "Success", "Ticket created successfully.")
+            self.parent.fetchTickets()
             self.accept()
         else:
             QMessageBox.warning(self, "Error", message)

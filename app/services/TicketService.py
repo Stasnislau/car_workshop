@@ -5,7 +5,7 @@ from database.db_setup import Ticket, TimeSlot
 
 
 class TicketService:
-    def createTicket(self, brand, model, registrationId, problemDescription, employeeId, startDate, endDate):
+    def createTicket(self, brand, model, registrationId, problemDescription, employeeId, startDate, endDate) -> tuple[bool, str]:
         try:
             if not brand or not model or not registrationId or not problemDescription or not employeeId:
                 return False, "All fields are required."
@@ -28,7 +28,7 @@ class TicketService:
         except Exception as e:
             return self.handleError(e)
 
-    def getTicket(self, ticketId):
+    def getTicket(self, ticketId) -> tuple[bool, str | Ticket]:
         try:
             session = create_session()
             ticket = session.query(Ticket).get(ticketId)
@@ -37,7 +37,7 @@ class TicketService:
         except Exception as e:
             return self.handleError(e)
 
-    def getTickets(self):
+    def getTickets(self) -> tuple[bool, list | str]:
         try:
             session = create_session()
             tickets = session.query(Ticket).all()
@@ -46,7 +46,7 @@ class TicketService:
         except Exception as e:
             return self.handleError(e)
 
-    def getEmployeeTickets(self, employeeId):
+    def getEmployeeTickets(self, employeeId) -> tuple[bool, list | str]:
         try:
             session = create_session()
             tickets = session.query(Ticket).filter_by(
@@ -56,7 +56,7 @@ class TicketService:
         except Exception as e:
             return self.handleError(e)
 
-    def updateTicket(self, ticketId, brand, model, registrationId, problemDescription, employeeId):
+    def updateTicket(self, ticketId, brand, model, registrationId, problemDescription) -> tuple[bool, str]:
         try:
             session = create_session()
             ticket = session.query(Ticket).get(ticketId)
@@ -64,14 +64,13 @@ class TicketService:
             ticket.model = model
             ticket.registrationId = registrationId
             ticket.problemDescription = problemDescription
-            ticket.employeeId = employeeId
             session.commit()
             session.close()
             return True, "Ticket updated successfully."
         except Exception as e:
             return self.handleError(e)
 
-    def deleteTicket(self, ticketId):
+    def deleteTicket(self, ticketId) -> tuple[bool, str]:
         try:
             session = create_session()
             ticket = session.query(Ticket).get(ticketId)
@@ -82,7 +81,7 @@ class TicketService:
         except Exception as e:
             return self.handleError(e)
 
-    def getTicketTimeSlots(self, ticketId):
+    def getTicketTimeSlots(self, ticketId) -> tuple[bool, list | str]:
         try:
             session = create_session()
             timeSlots = session.query(TimeSlot).filter_by(
@@ -92,7 +91,7 @@ class TicketService:
         except Exception as e:
             return self.handleError(e)
 
-    def updateTicketTimeSlot(self, timeSlotId, startTime, endTime, employeeId):
+    def updateTicketTimeSlot(self, timeSlotId, startTime, endTime, employeeId) -> tuple[bool, str]:
         try:
             session = create_session()
             timeSlot = session.query(TimeSlot).get(timeSlotId)
@@ -104,8 +103,21 @@ class TicketService:
             return True, "Time slot updated successfully."
         except Exception as e:
             return self.handleError(e)
+        
+    def approvePreliminary(self, ticketId) -> tuple[bool, str]:
+        try:
+            session = create_session()
+            ticket = session.query(Ticket).get(ticketId)
+            if ticket.estimateAccepted:
+                return False, "Ticket already approved."
+            ticket.estimateAccepted = True
+            session.commit()
+            session.close()
+            return True, "Ticket approved successfully."
+        except Exception as e:
+            return self.handleError(e)
 
-    def deleteTicketTimeSlot(self, timeSlotId):
+    def deleteTicketTimeSlot(self, timeSlotId) -> tuple[bool, str]:
         try:
             session = create_session()
             timeSlot = session.query(TimeSlot).get(timeSlotId)
@@ -116,6 +128,6 @@ class TicketService:
         except Exception as e:
             return self.handleError(e)
 
-    def handleError(self, error):
+    def handleError(self, error) -> tuple[bool, str]:
         print(f"Error: {error}")
         return False, "An error occurred. Please try again later."
