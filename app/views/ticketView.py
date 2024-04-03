@@ -1,19 +1,28 @@
-from PyQt5.QtWidgets import QPushButton, QLabel, QVBoxLayout, QWidget, QMainWindow, QComboBox, QHBoxLayout, QMessageBox
+from PyQt5.QtWidgets import (
+    QPushButton, QLabel, QVBoxLayout, QWidget, QMainWindow,
+    QComboBox, QHBoxLayout, QMessageBox
+)
 from PyQt5.QtCore import Qt
 from ..components.ticket.createTicketDialog import CreateTicketDialog
 from ..services.ticketService import TicketService
+from ..services.employeeService import EmployeeService
 from ..components.ticket.editTicketDialog import EditTicketDialog
 from ..components.ticket.deleteTicketDialog import DeleteTicketDialog
 
 
 class TicketView(QWidget):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
         self.currentTicket = None
+        self.currentEmployee = None
 
+        self.setupUI()
+
+    def setupUI(self):
         mainLayout = QVBoxLayout(self)
-        mainLayout.setContentsMargins(50, 50, 50, 50)  # Add some margin
+        mainLayout.setContentsMargins(50, 50, 50, 50)
 
         titleLabel = QLabel("Ticket Management", self)
         titleLabel.setStyleSheet(
@@ -21,21 +30,19 @@ class TicketView(QWidget):
         titleLabel.setFixedSize(300, 30)
         mainLayout.addWidget(titleLabel, alignment=Qt.AlignCenter)
 
-        # Middle part with left and right layouts
         middleWidget = QWidget()
         middleLayout = QHBoxLayout(middleWidget)
 
-        # Left part with buttons and dropdown
         leftWidget = QWidget()
         leftLayout = QVBoxLayout(leftWidget)
-        self.ticketDropdown = QComboBox(leftWidget)
-        self.ticketDropdown.setStyleSheet(
-            "font-size: 14px; background-color: #fff; border: 1px solid #ccc;")
 
-        self.ticketDropdown.setFixedSize(200, 50)
-        leftLayout.addWidget(self.ticketDropdown, alignment=Qt.AlignCenter)
-        self.ticketDropdown.currentIndexChanged.connect(
-            self.updateCurrentTicket)
+        self.employeeDropdown = QComboBox(leftWidget)
+        self.employeeDropdown.setStyleSheet(
+            "font-size: 14px; background-color: #fff; border: 1px solid #ccc;")
+        self.employeeDropdown.setFixedSize(200, 50)
+        self.employeeDropdown.currentIndexChanged.connect(
+            self.updateTicketDropdown)
+        leftLayout.addWidget(self.employeeDropdown, alignment=Qt.AlignCenter)
 
         optionsLayout = QVBoxLayout()
         leftLayout.addLayout(optionsLayout)
@@ -54,11 +61,11 @@ class TicketView(QWidget):
         rightWidget = QWidget()
         rightLayout = QVBoxLayout(rightWidget)
 
-        informationLabel = QLabel("Ticket Information", rightWidget)
-        informationLabel.setStyleSheet(
-            "font-size: 18px; font-weight: bold; color: #333;")
-        informationLabel.setFixedSize(210, 50)
-        rightLayout.addWidget(informationLabel, alignment=Qt.AlignCenter)
+        self.ticketDropdown = QComboBox(rightWidget)
+        self.ticketDropdown.setStyleSheet(
+            "font-size: 14px; background-color: #fff; border: 1px solid #ccc;")
+        self.ticketDropdown.setFixedSize(200, 50)
+        rightLayout.addWidget(self.ticketDropdown, alignment=Qt.AlignCenter)
 
         self.informationLabel = QLabel("No ticket selected", rightWidget)
         self.informationLabel.setStyleSheet("font-size: 14px; color: #666;")
@@ -74,7 +81,7 @@ class TicketView(QWidget):
         returnButton.setFixedSize(200, 50)
         mainLayout.addWidget(returnButton, alignment=Qt.AlignCenter)
 
-        self.fetchTickets()
+        self.fetchEmployees()
 
     def handleOptionClick(self):
         senderButton = self.sender()
@@ -86,6 +93,21 @@ class TicketView(QWidget):
                 self.editTicket()
             elif optionText == "Delete Ticket":
                 self.deleteTicket()
+
+    def updateTicketDropdown(self):
+        index = self.employeeDropdown.currentIndex()
+        if index != -1:
+            self.currentEmployee = self.employees[index]
+            if self.currentEmployee:
+                success, tickets = TicketService().getEmployeeTickets(self.currentEmployee.id)
+                if success:
+                    self.ticketDropdown.clear()
+                    for ticket in tickets:
+                        self.ticketDropdown.addItem(ticket.title)
+                    self.ticketDropdown.setDisabled(False)
+                    return
+        self.ticketDropdown.clear()
+        self.ticketDropdown.setDisabled(True)
 
     def updateCurrentTicket(self):
         index = self.ticketDropdown.currentIndex()
@@ -100,19 +122,16 @@ class TicketView(QWidget):
 
         self.informationLabel.setText(infoText)
 
-    def fetchTickets(self):
-        success, self.tickets = TicketService().getTickets()
+    def fetchEmployees(self):
+        success, self.employees = EmployeeService().getEmployees()
         if not success:
-            QMessageBox.warning(self, "Error", self.tickets)
+            QMessageBox.warning(self, "Error", self.employees)
             return
-        self.ticketDropdown.clear()
-        if not self.tickets:
-            self.ticketDropdown.setAccessibleName("No tickets found")
-            self.ticketDropdown.setDisabled(True)
+        if not self.employees:
+            QMessageBox.warning(self, "Error", "No employees found")
             return
-        self.ticketDropdown.setDisabled(False)
-        for ticket in self.tickets:
-            self.ticketDropdown.addItem(ticket.title)
+        for employee in self.employees:
+            self.employeeDropdown.addItem(employee.name)
 
     def returnToMainView(self):
         parentWidget = self.parent
@@ -120,14 +139,18 @@ class TicketView(QWidget):
             parentWidget.changeView("main")
 
     def addTicket(self):
-        CreateTicketDialog(self).show()
+        if self.currentEmployee:
+            CreateTicketDialog(self, self.currentEmployee).show()
+        else:
+            QMessageBox.warning(self, "Error", "Please select an employee.")
 
     def editTicket(self):
         if self.currentTicket:
-            edit_dialog = EditTicketDialog(self, self.currentTicket)
+            edit_dialog = EditTicketDialog(self.currentTicket)
             edit_dialog.exec_()
         else:
-            print("No ticket selected")
+            QMessageBox.warning(
+                self, "Error", "Please select a ticket to edit.")
 
     def deleteTicket(self):
         if self.currentTicket:
@@ -137,10 +160,19 @@ class TicketView(QWidget):
                 if success:
                     QMessageBox.information(
                         self, "Success", "Ticket deleted successfully.")
-                    self.fetchTickets() 
+                    self.fetchTickets()
                 else:
                     QMessageBox.warning(self, "Error", message)
             else:
                 print("Deletion canceled by user")
         else:
-            print("No ticket selected")
+            QMessageBox.warning(
+                self, "Error", "Please select a ticket to delete.")
+
+
+# TODO: добавить вьюху для тикетов, которая позволит создавать, редактировать и удалять тикеты
+# TODO: дропдаун сотрудников, от которых зависит второй дропдаун с тикетами. Нижний дропдаун задизейблен, пока не выбран сотрудник
+# TODO: оно крашится вот с такой херней пока
+#  File "c:\Everything\Programming\WUT\Car_workshop\app\views\ticketView.py", line 102, in updateTicketDropdown
+#     success, tickets = TicketService().getEmployeeTickets(self.currentEmployee.id)
+# AttributeError: 'TicketService' object has no attribute 'getEmployeeTickets'

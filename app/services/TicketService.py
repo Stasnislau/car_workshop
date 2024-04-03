@@ -1,15 +1,16 @@
 from datetime import timedelta
+import datetime
 from database.database_config import create_session
 from database.db_setup import Ticket, TimeSlot
 
 
 class TicketService:
-    def createTicket(self, brand, model, registrationId, problemDescription, employeeId, startDate, duration):
+    def createTicket(self, brand, model, registrationId, problemDescription, employeeId, startDate, endDate):
         try:
             if not brand or not model or not registrationId or not problemDescription or not employeeId:
                 return False, "All fields are required."
-            if not startDate or not duration:
-                return False, "Start date and duration are required."
+            if not startDate or not endDate:
+                return False, "Start date and end date required."
             print(
                 f"Creating ticket: {brand}, {model}, {registrationId}, {problemDescription}, {employeeId}")
             ticket = Ticket(brand, model, registrationId,
@@ -18,8 +19,8 @@ class TicketService:
             session = create_session()
             session.add(ticket)
             session.flush()
-            timeSlot = TimeSlot(startDate, startDate +
-                                timedelta(hours=duration), employeeId, ticket.id)
+            timeSlot = TimeSlot(
+                startDate, endDate, employeeId, ticket.id)
             session.add(timeSlot)
             session.commit()
             session.close()
@@ -40,6 +41,16 @@ class TicketService:
         try:
             session = create_session()
             tickets = session.query(Ticket).all()
+            session.close()
+            return True, tickets
+        except Exception as e:
+            return self.handleError(e)
+
+    def getEmployeeTickets(self, employeeId):
+        try:
+            session = create_session()
+            tickets = session.query(Ticket).filter_by(
+                employeeId=employeeId).all()
             session.close()
             return True, tickets
         except Exception as e:
@@ -95,7 +106,6 @@ class TicketService:
             return self.handleError(e)
 
     def deleteTicketTimeSlot(self, timeSlotId):
-
         try:
             session = create_session()
             timeSlot = session.query(TimeSlot).get(timeSlotId)
