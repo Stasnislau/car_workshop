@@ -26,7 +26,7 @@ class TicketSchedule(QWidget):
 
     def fetchSchedule(self):
         if self.ticket:
-            success, timeSlots = TimeService().getTimeSlotsForTicket(self.ticket.id)
+            success, timeSlots,  = TimeService().getTimeSlotsForTicket(self.ticket.id)
             if success:
                 self.updateSchedule(timeSlots)
 
@@ -34,12 +34,12 @@ class TicketSchedule(QWidget):
         self.scheduleTable.setRowCount(len(timeSlots))
         for row, timeSlot in enumerate(timeSlots):
             date = timeSlot.startTime.strftime("%Y-%m-%d") 
-            start_time = timeSlot.startTime.strftime("%H:%M") 
-            end_time = timeSlot.endTime.strftime("%H:%M")
+            startTime = timeSlot.startTime.strftime("%H:%M") 
+            endTime = timeSlot.endTime.strftime("%H:%M")
 
             self.scheduleTable.setItem(row, 0, QTableWidgetItem(date))
-            self.scheduleTable.setItem(row, 1, QTableWidgetItem(start_time))
-            self.scheduleTable.setItem(row, 2, QTableWidgetItem(end_time))
+            self.scheduleTable.setItem(row, 1, QTableWidgetItem(startTime))
+            self.scheduleTable.setItem(row, 2, QTableWidgetItem(endTime))
 
         self.scheduleTable.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         

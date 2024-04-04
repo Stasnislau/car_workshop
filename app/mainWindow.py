@@ -14,16 +14,7 @@ class MainWindow(QMainWindow):
         self.changeView("main")
 
         self.setWindowTitle("Car Workshop")
-        self.setGeometry(0, 0, 1920, 1080)
-        screenGeometry = QApplication.desktop().screenGeometry()
-        windowGeometry = self.geometry()
-        windowCenterPoint = windowGeometry.center()
-        screenCenterPoint = screenGeometry.center()
-        windowCenterPoint.setX(
-            screenCenterPoint.x() - round(windowGeometry.width() / 2))
-        windowCenterPoint.setY(
-            screenCenterPoint.y() - round(windowGeometry.height() / 2))
-        self.move(windowCenterPoint)
+        self.showMaximized()
 
     def changeView(self, view):
         currentView = self.centralWidget()

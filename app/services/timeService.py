@@ -2,6 +2,14 @@ from database.database_config import create_session
 from database.db_setup import Ticket, TimeSlot, Employee
 from .ticketService import TicketService
 
+class TimeSlotDTO:
+    def __init__(self, startTime, endTime, employeeId, ticketId, registrationId):
+        self.startTime = startTime
+        self.endTime = endTime
+        self.employeeId = employeeId
+        self.ticketId = ticketId
+        self.registrationId = registrationId
+   
 class TimeService: 
     def createTimeSlot(self, startTime, endTime, employeeId, ticketId) -> tuple[bool, str]:
         try:
@@ -37,14 +45,17 @@ class TimeService:
     def getTimeSlotsForEmployee(self, employeeId) -> tuple[bool, list | str]:
         try:
             session = create_session()
-            tickets = session.query(TimeSlot).filter_by(employeeId=employeeId).all()
+            tickets = session.query(Ticket).filter_by(employeeId=employeeId).all()
             if not tickets:
                 session.close()
                 return False, "No time slots found for this employee."
             else:
                 timeSlots = []
                 for ticket in tickets:
-                    newTimeSlot = session.query(TimeSlot).filter_by(ticketId=ticket.id).all()
+                    gotTimeSlots = session.query(TimeSlot).filter_by(ticketId=ticket.id).all()
+                    
+                    for gotTimeSlot in gotTimeSlots:
+                        newTimeSlot = TimeSlotDTO(gotTimeSlot.startTime, gotTimeSlot.endTime, gotTimeSlot.employeeId, gotTimeSlot.ticketId, ticket.registrationId)
                     timeSlots.append(newTimeSlot)
                 session.close()
                 return True, timeSlots

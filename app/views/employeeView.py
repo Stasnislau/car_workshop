@@ -1,9 +1,10 @@
-from PyQt5.QtWidgets import QPushButton, QLabel, QVBoxLayout, QWidget, QMainWindow, QComboBox, QHBoxLayout, QMessageBox
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QPushButton, QLabel, QVBoxLayout, QWidget, QMainWindow, QComboBox, QHBoxLayout, QMessageBox, QFormLayout, QSizePolicy, QGridLayout
+from PyQt5.QtCore import Qt, QSize
 from ..components.employee.createEmployeeDialog import CreateEmployeeDialog
 from ..services.employeeService import EmployeeService
 from ..components.employee.editEmployeeDialog import EditEmployeeDialog
 from ..components.employee.deleteEmployeeDialog import DeleteEmployeeDialog
+from ..components.schedules.employeeSchedule import EmployeeSchedule
 
 
 class EmployeeView(QWidget):
@@ -18,7 +19,6 @@ class EmployeeView(QWidget):
         titleLabel = QLabel("Employee Management", self)
         titleLabel.setStyleSheet(
             "font-size: 24px; font-weight: bold; color: #333;")
-        titleLabel.setFixedSize(300, 30)
         mainLayout.addWidget(titleLabel, alignment=Qt.AlignCenter)
 
         # Middle part with left and right layouts
@@ -27,42 +27,57 @@ class EmployeeView(QWidget):
 
         # Left part with buttons and dropdown
         leftWidget = QWidget()
-        leftLayout = QVBoxLayout(leftWidget)
+        leftWidget.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Fixed)
+        leftLayout = QFormLayout(leftWidget)
+        leftLayout.setContentsMargins(0, 0, 0, 0)
+        leftLayout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
+        leftLayout.setFormAlignment(Qt.AlignCenter)
+        leftLayout.setLabelAlignment(Qt.AlignRight)
         self.employeeDropdown = QComboBox(leftWidget)
+
         self.employeeDropdown.setStyleSheet(
             "font-size: 14px; background-color: #fff; border: 1px solid #ccc;")
-
-        self.employeeDropdown.setFixedSize(200, 50)
-        leftLayout.addWidget(self.employeeDropdown, alignment=Qt.AlignCenter)
+        self.employeeDropdown.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Fixed)
+        leftLayout.addRow(self.employeeDropdown)
         self.employeeDropdown.currentIndexChanged.connect(
             self.updateCurrentEmployee)
 
-        optionsLayout = QVBoxLayout()
-        leftLayout.addLayout(optionsLayout)
+        optionsLayout = QGridLayout()
+        leftLayout.addRow(optionsLayout)
+
+        leftLayout.setContentsMargins(0, 0, 0, 0)
 
         options = ["Add Employee", "Edit Employee", "Delete Employee"]
-        for option in options:
+        for i, option in enumerate(options):
             button = QPushButton(option, leftWidget)
             button.setStyleSheet(
                 "font-size: 14px; background-color: #007bff; color: #fff; border: none;")
+            button.setFixedSize(QSize(150, 50))
             button.clicked.connect(self.handleOptionClick)
-            button.setFixedSize(200, 50)
-            optionsLayout.addWidget(button, alignment=Qt.AlignCenter)
+            optionsLayout.addWidget(button, i // 3, i % 3)
 
         middleLayout.addWidget(leftWidget)
 
         rightWidget = QWidget()
-        rightLayout = QVBoxLayout(rightWidget)
+        rightLayout = QFormLayout(rightWidget)
+        rightLayout.setContentsMargins(0, 0, 0, 0)
+        rightLayout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
+        rightLayout.setFormAlignment(Qt.AlignCenter)
+        rightLayout.setLabelAlignment(Qt.AlignRight)
 
         informationLabel = QLabel("Employee Information", rightWidget)
         informationLabel.setStyleSheet(
             "font-size: 18px; font-weight: bold; color: #333;")
-        informationLabel.setFixedSize(210, 50)
-        rightLayout.addWidget(informationLabel, alignment=Qt.AlignCenter)
+        rightLayout.addWidget(informationLabel)
 
         self.informationLabel = QLabel("No employee selected", rightWidget)
         self.informationLabel.setStyleSheet("font-size: 14px; color: #666;")
-        rightLayout.addWidget(self.informationLabel, alignment=Qt.AlignCenter)
+        rightLayout.addWidget(self.informationLabel)
+
+        self.employeeSchedule = EmployeeSchedule(self, self.currentEmployee)
+        rightLayout.addWidget(self.employeeSchedule)
 
         middleLayout.addWidget(rightWidget)
         mainLayout.addWidget(middleWidget)
@@ -71,7 +86,7 @@ class EmployeeView(QWidget):
         returnButton.clicked.connect(self.returnToMainView)
         returnButton.setStyleSheet(
             "font-size: 14px; background-color: #6c757d; color: #fff; border: none;")
-        returnButton.setFixedSize(200, 50)
+        returnButton.setFixedSize(QSize(200, 50))
         mainLayout.addWidget(returnButton, alignment=Qt.AlignCenter)
 
         self.fetchEmployees()
@@ -93,6 +108,7 @@ class EmployeeView(QWidget):
             self.currentEmployee = self.employees[index]
             if self.currentEmployee:
                 infoText = f"Name: {self.currentEmployee.name}\nHourly Rate: {self.currentEmployee.hourlyRate}"
+                self.employeeSchedule.setEmployee(self.currentEmployee)
             else:
                 infoText = "No employee selected"
         else:
@@ -137,7 +153,7 @@ class EmployeeView(QWidget):
                 if success:
                     QMessageBox.information(
                         self, "Success", "Employee deleted successfully.")
-                    self.fetchEmployees() 
+                    self.fetchEmployees()
                 else:
                     QMessageBox.warning(self, "Error", message)
             else:

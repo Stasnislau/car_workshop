@@ -259,4 +259,3 @@ class TicketView(QWidget):
             return f"Estimate Cost: {self.currentTicket.estimateCost}"
 
 
-# TODO: Add one more button for the employee to accept the ticket, if the ticket is accepted both the employee and the ticket status goes to "In Progress"
