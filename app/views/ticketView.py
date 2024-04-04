@@ -11,6 +11,7 @@ from ..components.ticket.editTicketDialog import EditTicketDialog
 from ..components.ticket.deleteTicketDialog import DeleteTicketDialog
 from ..components.ticket.createPartDialog import CreatePartDialog
 from ..components.ticket.editPartDialog import EditPartDialog
+from ..components.schedules.ticketSchedule import TicketSchedule
 
 
 class TicketView(QWidget):
@@ -105,8 +106,11 @@ class TicketView(QWidget):
             "font-size: 14px; background-color: #6c757d; color: #fff; border: none;")
         returnButton.setFixedSize(QSize(200, 50))
         mainLayout.addWidget(returnButton, alignment=Qt.AlignCenter)
-
+        self.ticketSchedule = TicketSchedule(self, self.currentTicket)
+        rightLayout.addWidget(self.ticketSchedule)
         self.fetchEmployees()
+        
+           
 
     def handleOptionClick(self):
         senderButton = self.sender()
@@ -155,6 +159,7 @@ class TicketView(QWidget):
             self.currentTicket = self.tickets[index]
             if self.currentTicket:
                 infoText = f"Registration number: {self.currentTicket.registrationId}\nBrand: {self.currentTicket.brand}\nModel: {self.currentTicket.model}\nProblem Description: {self.currentTicket.problemDescription}\n{self.displayedCost()}"
+                self.ticketSchedule.setTicket(self.currentTicket)
             else:
                 infoText = "No ticket selected"
         else:

@@ -1,5 +1,4 @@
 from datetime import timedelta
-import datetime
 from database.database_config import create_session
 from database.db_setup import Ticket, TimeSlot, Employee
 

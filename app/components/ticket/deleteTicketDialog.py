@@ -9,6 +9,7 @@ class DeleteTicketDialog(QDialog):
         self.setFixedSize(300, 100)
         self.employee = employee
         self.ticket = ticket
+        self.parent = parent
 
         layout = QVBoxLayout()
 

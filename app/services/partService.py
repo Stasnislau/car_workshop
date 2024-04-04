@@ -25,6 +25,14 @@ class PartService:
             
             session = create_session()
             part = session.query(Part).get(partId)
+            if not part:
+                return False, "Part not found."
+            if amount == 0:
+                session.delete(part)
+                session.commit()
+                TicketService().recalculateExpanses(part.ticketId)
+                session.close()
+                return True, "Part deleted successfully."
             part.name = name
             part.amount = amount
             part.unitPrice = unitPrice
@@ -57,6 +65,7 @@ class PartService:
             return True, parts
         except Exception as e:
             return self.handleError(e)
+        
 
     def handleError(self, error) -> tuple[bool, str]:
         print(f"Error: {error}")
