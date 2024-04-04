@@ -29,6 +29,7 @@ class DeleteTicketDialog(QDialog):
         success, message = TicketService().deleteTicket(self.ticket.id)
         if success:
             QMessageBox.information(self, "Success", "Ticket deleted successfully.")
+            self.parent.fetchTickets()
             self.accept()
         else:
             QMessageBox.warning(self, "Error", message)

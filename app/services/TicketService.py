@@ -1,7 +1,7 @@
 from datetime import timedelta
 import datetime
 from database.database_config import create_session
-from database.db_setup import Ticket, TimeSlot
+from database.db_setup import Ticket, TimeSlot, Employee
 
 
 class TicketService:
@@ -139,8 +139,9 @@ class TicketService:
             timeSlots = session.query(TimeSlot).filter_by(ticketId=ticketId).all()
             totalHours = 0
             for timeSlot in timeSlots:
-                totalHours += timeSlot.endTime - timeSlot.startTime
-            totalPrice = totalHours * ticket.employee.hourlyRate
+                totalHours += int((timeSlot.endTime - timeSlot.startTime).total_seconds() / 3600)
+            hourlyRate = session.query(Employee).get(ticket.employeeId).hourlyRate
+            totalPrice = totalHours * hourlyRate
             for part in ticket.parts:
                 totalPrice += part.totalPrice
             if ticket.estimateAccepted:

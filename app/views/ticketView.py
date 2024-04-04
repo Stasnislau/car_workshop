@@ -213,18 +213,8 @@ class TicketView(QWidget):
 
     def deleteTicket(self):
         if self.currentTicket:
-            dialog = DeleteTicketDialog(
-                self.currentTicket, self, self.currentEmployee)
-            if dialog.exec_():
-                success, message = TicketService().deleteTicket(self.currentTicket.id)
-                if success:
-                    QMessageBox.information(
-                        self, "Success", "Ticket deleted successfully.")
-                    self.fetchTickets()
-                else:
-                    QMessageBox.warning(self, "Error", message)
-            else:
-                print("Deletion canceled by user")
+            DeleteTicketDialog(
+                self.currentTicket, self, self.currentEmployee).show()
         else:
             QMessageBox.warning(
                 self, "Error", "Please select a ticket to delete.")
@@ -242,16 +232,20 @@ class TicketView(QWidget):
             QMessageBox.warning(self, "Error", "Please select a ticket.")
 
     def confirmEstimate(self):
-        if self.currentTicket is not None and self.currentTicket.estimateAccepted is False:
-            success, message = TicketService().confirmEstimate(self.currentTicket.id)
-            if success:
-                QMessageBox.information(
-                    self, "Success", "Estimate confirmed successfully.")
-                self.fetchTickets()
-            else:
-                QMessageBox.warning(self, "Error", message)
-        else:
+        if self.currentTicket is None:
             QMessageBox.warning(self, "Error", "Please select a ticket.")
+            return
+        if self.currentTicket.estimateAccepted is True:
+            QMessageBox.warning(self, "Error", "Estimate already accepted.")
+            return
+        
+        success, message = TicketService().confirmEstimate(self.currentTicket.id)
+        if success:
+            QMessageBox.information(
+                self, "Success", "Estimate confirmed successfully.")
+            self.currentTicket.estimateAccepted = True
+        else:
+            QMessageBox.warning(self, "Error", message)
 
     def displayedCost(self):
         if self.currentTicket.estimateAccepted:
