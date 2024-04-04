@@ -89,7 +89,7 @@ class Part(Base):
         self.name = name
         self.amount = amount
         self.unitPrice = unitPrice
-        self.totalPrice = amount * unitPrice
+        self.totalPrice = float(amount) * float(unitPrice)
         self.ticketId = ticketId
 
 

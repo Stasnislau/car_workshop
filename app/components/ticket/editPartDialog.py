@@ -41,12 +41,12 @@ class EditPartDialog(QDialog):
         layout.addWidget(QLabel("Unit Price:", self))
         layout.addWidget(self.unitPriceInput)
 
-        saveButton = QPushButton("Save", self)
-        saveButton.setEnabled(False)
-        saveButton.clicked.connect(self.savePart)
-        saveButton.setStyleSheet("background-color: #007bff; color: #fff; border: none; padding: 5px 10px; font-size: 14px;")
-        saveButton.setFixedWidth(100)
-        layout.addWidget(saveButton)
+        self.saveButton = QPushButton("Save", self)
+        self.saveButton.setEnabled(False)
+        self.saveButton.clicked.connect(self.savePart)
+        self.saveButton.setStyleSheet("background-color: #007bff; color: #fff; border: none; padding: 5px 10px; font-size: 14px;")
+        self.saveButton.setFixedWidth(100)
+        layout.addWidget(self.saveButton)
 
         self.setLayout(layout)
 
@@ -56,12 +56,12 @@ class EditPartDialog(QDialog):
         success, parts = PartService().getPartsForTicket(self.ticket.id)
         if not success:
             QMessageBox.warning(self, "Error", "Failed to fetch parts")
-            self.close()
+            self.accept()
             return
 
         if not parts:
             QMessageBox.warning(self, "Error", "No parts found for this ticket")
-            self.close()
+            self.accept()
             return
 
         self.parts = parts
@@ -82,21 +82,21 @@ class EditPartDialog(QDialog):
         self.nameInput.setEnabled(True)
         self.amountInput.setText(str(self.part.amount))
         self.amountInput.setEnabled(True)
-        self.unitPriceInput.setText(str(self.part.unit_price))
+        self.unitPriceInput.setText(str(self.part.unitPrice))
         self.unitPriceInput.setEnabled(True)
         self.saveButton.setEnabled(True)
 
     def savePart(self):
-        part_id = self.partDropdown.currentData()
+        partId = self.partDropdown.currentData()
         name = self.nameInput.text()
         amount = float(self.amountInput.text())
-        unit_price = float(self.unitPriceInput.text())
+        unitPrice = float(self.unitPriceInput.text())
 
-        if not all([name, amount, unit_price]):
+        if not all([name, amount, unitPrice]):
             QMessageBox.warning(self, "Error", "All fields are required.")
             return
 
-        success, message = PartService().updatePart(part_id, name, amount, unit_price)
+        success, message = PartService().updatePart(partId, name, amount, unitPrice)
         if success:
             QMessageBox.information(self, "Success", "Part updated successfully.")
             self.accept()

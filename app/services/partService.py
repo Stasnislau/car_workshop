@@ -8,7 +8,7 @@ class PartService:
             if not name or not amount or not unitPrice:
                 return False, "All fields are required."
             session = create_session()
-            part = Part(ticketId, name, amount, unitPrice)
+            part = Part( name, amount, unitPrice, ticketId)
             session.add(part)
             session.commit()
             TicketService().recalculateExpanses(part.ticketId)
