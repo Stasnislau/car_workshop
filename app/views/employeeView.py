@@ -21,11 +21,9 @@ class EmployeeView(QWidget):
             "font-size: 24px; font-weight: bold; color: #333;")
         mainLayout.addWidget(titleLabel, alignment=Qt.AlignCenter)
 
-        # Middle part with left and right layouts
         middleWidget = QWidget()
         middleLayout = QHBoxLayout(middleWidget)
 
-        # Left part with buttons and dropdown
         leftWidget = QWidget()
         leftWidget.setSizePolicy(
             QSizePolicy.Expanding, QSizePolicy.Fixed)

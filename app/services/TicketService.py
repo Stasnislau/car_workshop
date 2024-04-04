@@ -1,6 +1,20 @@
 from datetime import timedelta
 from database.database_config import create_session
-from database.db_setup import Ticket, TimeSlot, Employee
+from database.db_setup import Ticket, TimeSlot, Employee, Part
+
+class TicketDTO:
+    def __init__(self, id, brand, model, registrationId, problemDescription, employeeId, estimateCost, estimateAccepted, pricePaid, parts, timeSlots):
+        self.id = id
+        self.brand = brand
+        self.model = model
+        self.registrationId = registrationId
+        self.problemDescription = problemDescription
+        self.employeeId = employeeId
+        self.estimateCost = estimateCost
+        self.estimateAccepted = estimateAccepted
+        self.pricePaid = pricePaid
+        self.parts = parts
+        self.timeSlots = timeSlots
 
 
 class TicketService:
@@ -56,7 +70,7 @@ class TicketService:
         except Exception as e:
             return self.handleError(e)
 
-    def updateTicket(self, ticketId, brand, model, registrationId, problemDescription) -> tuple[bool, str]:
+    def updateTicket(self, ticketId, brand, model, registrationId, problemDescription, status) -> tuple[bool, str]:
         try:
             session = create_session()
             ticket = session.query(Ticket).get(ticketId)
@@ -64,6 +78,7 @@ class TicketService:
             ticket.model = model
             ticket.registrationId = registrationId
             ticket.problemDescription = problemDescription
+            ticket.state = status
             session.commit()
             self.recalculateExpanses(ticket.id)
             session.close()
@@ -150,6 +165,20 @@ class TicketService:
             session.commit()
             session.close()
             return True, "Expanse recalculated successfully."
+        except Exception as e:
+            return self.handleError(e)
+        
+    def getTicketDocument(self, ticketId) -> tuple[bool, TicketDTO | str]:
+        try:
+            session = create_session()
+            ticket = session.query(Ticket).get(ticketId)
+            employee = session.query(Employee).get(ticket.employeeId)
+            timeSlots = session.query(TimeSlot).filter_by(ticketId=ticketId).all()
+            parts = session.query(Part).filter_by(ticketId=ticketId).all()
+            session.close()
+            ticketDTO = TicketDTO(ticket.id, ticket.brand, ticket.model, ticket.registrationId,
+                                ticket.problemDescription, ticket.employeeId, ticket.estimateCost, ticket.estimateAccepted, ticket.pricePaid, parts, timeSlots)
+            return True, ticketDTO
         except Exception as e:
             return self.handleError(e)
 

@@ -1,6 +1,12 @@
 from database.database_config import create_session
-from database.db_setup import Employee
+from database.db_setup import Employee, Ticket, TimeSlot
 
+class documentDTO: 
+    def __init__(self, name, hourlyRate, tickets, timeSlots):
+        self.name = name
+        self.hourlyRate = hourlyRate
+        self.tickets = tickets
+        self.timeSlots = timeSlots
 
 class EmployeeService:
     def createEmployee(self, name, hourlyRate):
@@ -63,6 +69,22 @@ class EmployeeService:
             session.commit()
             session.close()
             return True, "Employee deleted successfully."
+        except Exception as e:
+            return self.handleError(e)
+        
+    def fetchEmployeeDocument(self, employeeId):
+        try:
+            session = create_session()
+            employee = session.query(Employee).get(employeeId)
+            tickets = session.query(Ticket).filter_by(employeeId=employeeId).all()
+            timeSlots = []
+            for ticket in tickets:
+                slots = session.query(TimeSlot).filter_by(ticketId=ticket.id).all()
+                timeSlots.extend(slots)
+            session.close()
+            
+            dto = documentDTO(employee.name, employee.hourlyRate, tickets, timeSlots)
+            return True, dto
         except Exception as e:
             return self.handleError(e)
 
